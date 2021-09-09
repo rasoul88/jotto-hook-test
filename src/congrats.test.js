@@ -1,25 +1,39 @@
 import React from "react";
-import { shallow } from "enzyme";
+import { shallow, mount } from "enzyme";
 
 import Congrats from "./congrats";
 import { findByDataAttr, checkProps } from "./test/testUtils";
+import LanguageContext from "./contexts/languageContext";
 
-const defaultProps = { success: false };
-
-const setup = (props = {}) => {
-  const setupProps = { ...defaultProps, ...props };
-  const wrapper = shallow(<Congrats {...setupProps} />);
-  return wrapper;
+const setup = ({ success, language }) => {
+  language = language || "en";
+  success = success || false;
+  return mount(
+    <LanguageContext.Provider value={language}>
+      <Congrats success={success} />
+    </LanguageContext.Provider>
+  );
 };
 
+describe("languagePicker", () => {
+  test("correctly renders congrats string in english", () => {
+    const wrapper = setup({ success: true });
+    expect(wrapper.text()).toBe("Congratulations! You guessed the word!");
+  });
+  test("correctly renders congrats string in emoji", () => {
+    const wrapper = setup({ success: true, language: "emoji" });
+    expect(wrapper.text()).toBe("🎯🎉");
+  });
+});
+
 test("renders without error", () => {
-  const wrapper = setup();
+  const wrapper = setup({});
   const congratsComponent = findByDataAttr(wrapper, "component-congrats");
   expect(congratsComponent.length).toBe(1);
 });
 
 test("renders no text when `success` prop is false", () => {
-  const wrapper = setup();
+  const wrapper = setup({});
   const congratsComponent = findByDataAttr(wrapper, "component-congrats");
   expect(congratsComponent.text()).toBe("");
 });
